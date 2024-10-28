@@ -1,7 +1,7 @@
 "use client";
-import { stories, Story } from '..//app/data/stories';
-import { useSearchParams } from 'next/navigation'; 
-import { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
+import { stories, Story } from '../app/data/stories';
+import { useSearchParams } from 'next/navigation';
 
 const Stories = () => {
   const searchParams = useSearchParams();
@@ -113,4 +113,10 @@ const Stories = () => {
   );
 };
 
-export default Stories;
+const Page = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Stories />
+  </Suspense>
+);
+
+export default Page;
