@@ -1,101 +1,116 @@
-import Image from "next/image";
+"use client";
+import { stories, Story } from '..//app/data/stories';
+import { useSearchParams } from 'next/navigation'; 
+import { useState, useEffect } from 'react';
 
-export default function Home() {
+const Stories = () => {
+  const searchParams = useSearchParams();
+  const category = searchParams.get('category') || '';
+  const search = searchParams.get('search') || '';
+  const sort = searchParams.get('sort') || '';
+
+  const [filteredStories, setFilteredStories] = useState<Story[]>([]);
+
+  useEffect(() => {
+    let filtered = stories;
+
+    // Filter by category
+    if (category) {
+      filtered = filtered.filter(story => story.category.toLowerCase() === category.toLowerCase());
+    }
+
+    // Search by title
+    if (search) {
+      filtered = filtered.filter(story => story.title.toLowerCase().includes(search.toLowerCase()));
+    }
+
+    // Sort by date or title
+    if (sort === 'date') {
+      filtered = filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    } else if (sort === 'title') {
+      filtered = filtered.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    setFilteredStories(filtered);
+  }, [category, search, sort]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">Stories</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className="mb-4">
+        <label className="block mb-2">
+          Search:
+          <input
+            type="text"
+            defaultValue={search}
+            onChange={(e) => {
+              const value = e.target.value;
+              const params = new URLSearchParams(window.location.search);
+              params.set('search', value);
+              window.history.pushState({}, '', `${window.location.pathname}?${params}`);
+            }}
+            className="mt-1 p-2 border border-gray-300 rounded w-full"
+            placeholder="Search by title..."
+          />
+        </label>
+
+        <label className="block mb-2">
+          Category:
+          <select
+            defaultValue={category}
+            onChange={(e) => {
+              const value = e.target.value;
+              const params = new URLSearchParams(window.location.search);
+              if (value) {
+                params.set('category', value);
+              } else {
+                params.delete('category');
+              }
+              window.history.pushState({}, '', `${window.location.pathname}?${params}`);
+            }}
+            className="mt-1 p-2 border border-gray-300 rounded w-full"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <option value="">All</option>
+            <option value="Tech">Tech</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Travel">Travel</option>
+          </select>
+        </label>
+
+        <label className="block mb-2">
+          Sort By:
+          <select
+            defaultValue={sort}
+            onChange={(e) => {
+              const value = e.target.value;
+              const params = new URLSearchParams(window.location.search);
+              if (value) {
+                params.set('sort', value);
+              } else {
+                params.delete('sort');
+              }
+              window.history.pushState({}, '', `${window.location.pathname}?${params}`);
+            }}
+            className="mt-1 p-2 border border-gray-300 rounded w-full"
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <option value="">None</option>
+            <option value="date">Date</option>
+            <option value="title">Title</option>
+          </select>
+        </label>
+      </div>
+
+      <ul className="space-y-4">
+        {filteredStories.map(story => (
+          <li key={story.id} className="p-4 border border-gray-300 rounded shadow-sm">
+            <h2 className="text-xl font-semibold">{story.title}</h2>
+            <p className="text-gray-600">{story.author} - {story.category} - {story.date}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
-}
+};
+
+export default Stories;
